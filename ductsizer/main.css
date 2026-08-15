@@ -1,0 +1,143 @@
+/* Page-specific styles for DuctSizer — shared chrome (nav, cards, type) lives in ../main.css */
+
+.page-head {
+  padding-top: 24px;
+  margin-bottom: 8px;
+}
+
+/* Clear the fixed navbar + give the tool breathing room */
+main.container {
+  padding-top: 28px;
+}
+
+.page-head h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--ink);
+}
+
+/* Force the unit selects wide enough to read */
+.input-group-append {
+  width: 136px;
+}
+
+.input-group-append.vel-unit,
+.input-group-append.dia-unit {
+  width: 110px;
+}
+
+/* SI <-> US toggle switch */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 77px;
+  height: 29px;
+}
+
+.switch input {
+  display: none;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--accent);
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
+  border-radius: 29px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 22px;
+  width: 22px;
+  left: 4px;
+  bottom: 4px;
+  background-color: #fff;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: var(--amber);
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px var(--accent);
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(46px);
+  -ms-transform: translateX(46px);
+  transform: translateX(46px);
+}
+
+.slider:after {
+  content: 'SI';
+  color: #fff;
+  display: block;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  top: 50%;
+  left: 65%;
+  font-size: 10px;
+  font-family: var(--font-mono);
+}
+
+input:checked + .slider:after {
+  content: 'US';
+  left: 35%;
+}
+
+.btn-circle.btn-sm {
+  width: 30px;
+  height: 30px;
+  padding: 3px 4px;
+  border-radius: 15px;
+  font-size: 15px;
+  font-weight: bold;
+}
+
+.red-f {
+  color: red;
+}
+
+/* Results pane: folded shut on arrival, opens like a page turning once results land */
+.calc-row {
+  perspective: 2000px;
+}
+
+.calc-row .results-pane {
+  transform-origin: left center;
+  transition: transform 0.85s cubic-bezier(0.22, 1, 0.36, 1),
+              opacity 0.85s ease;
+}
+
+.calc-row.pane-closed .results-pane {
+  transform: rotateY(-90deg);
+  opacity: 0;
+  visibility: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .calc-row .results-pane {
+    transition: none;
+  }
+}
+
+/* Error message shown when the calculator service can't answer */
+.calc-alert {
+  margin: 14px 0 0;
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  color: #b3261e;
+  background: rgba(214, 60, 60, 0.1);
+  border: 1px solid rgba(214, 60, 60, 0.35);
+  border-radius: 9px;
+}

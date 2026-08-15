@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>DuctSizer — HVAC Duct Sizing Calculator | Sanjeet Nayak</title>
+    <meta name="description"
+        content="Online HVAC duct sizing calculator — solve flow rate, velocity, head loss and equivalent diameter in SI or US units. Built by Sanjeet Kumar Nayak.">
+    <meta property="og:title" content="DuctSizer — HVAC Duct Sizing Calculator">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://sanjeetnayak.github.io/ductsizer/">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+    <link rel="stylesheet" type="text/css" href="main.css">
+</head>
+<body>
+      <header class="site-header" data-nav-placeholder></header>
+
+  
+    <div class="container">
+        <main role="main" class="container">
+            <div class="row">
+              <div class="col">
+                <div>
+
+
+<div class="row">
+    <div class="col-10">
+    <h2>Duct Sizing Calculator</h2>
+    </div>
+    <div class="col-2">
+    <form class="form-inline my-2 my-lg-0 float-right">
+      <!-- <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+      <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button> -->
+      <label class="switch"><input type="checkbox" id="togBtn"><div class="slider round"></div></label>
+    </form>
+    </div>
+  </div>
+    <div class="row calc-row pane-closed">
+      <div class="col-md-6 mt-3 shadow-lg p-3 mb-5 bg-white rounded">
+        <form id="myform" method="POST">
+            <label for="inputFlow">Flow Rate</label>
+              <div class="input-group" style="margin-bottom: 1rem;">
+                <div class="input-group-prepend">
+                  <div class="input-group-text">
+                  <input type="checkbox" class="checkbox" name="first">
+                  </div>
+                </div>
+  
+                <input type="number" min="1" class="form-control forms num" id="inputFlow" required="required" placeholder="Ex: 6000" disabled>
+                <div class="input-group-append flow-unit">
+                    <select class="form-control forms" id="inputFlow1" disabled>
+                        <option>LPS</option>
+                        <option>CFM</option>
+                      </select>   
+                    </div>
+              </div> 
+              <label for="inputHead">Head Loss</label>
+              <div class="input-group" style="margin-bottom: 1rem;">
+                <div class="input-group-prepend">
+                  <div class="input-group-text">
+                    <input type="checkbox" class="checkbox" name="second">
+                  </div>
+                </div>
+                <input type="number" min="0.001" step="0.001" class="form-control forms num" id="inputHead" required="required" placeholder="Ex: 0.6" disabled>
+                <div class="input-group-append hl-unit">
+                    <select class="form-control forms" id="inputHead1" disabled>
+                        <option>Pa/m</option>
+                        <option>in.WC/100 ft</option>
+                      </select>   
+                    </div>
+              </div>
+            <label for="inputVel">Velocity</label>
+            <div class="input-group" style="margin-bottom: 1rem;">
+              <div class="input-group-prepend">
+                <div class="input-group-text">
+                  <input type="checkbox" class="checkbox" name="third">
+                </div>
+              </div>
+                <input type="number" min="0.01" step="0.01" class="form-control forms num" id="inputVel" required="required" placeholder="Ex: 6" disabled>
+                <div class="input-group-append vel-unit" style="width: 136px;">
+                    <select class="form-control forms" id="inputVel1" disabled>
+                        <option>m/sec</option>
+                        <option>fpm</option>
+                      </select>   
+                    </div>
+              </div>
+              <label for="inputVel">Equivalent Diameter</label>
+              <div class="input-group" style="margin-bottom: 1rem;">
+                <div class="input-group-prepend">
+                  <div class="input-group-text">
+                    <input type="checkbox" class="checkbox" name="fourth">
+                  </div>
+                </div>
+                  <input type="number" min="0.01" step="0.01"class="form-control forms num" id="inputDia" required="required" placeholder="Ex: 600" disabled>
+                  <div class="input-group-append dia-unit" style="width: 136px;">
+                      <select class="form-control forms" id="inputDia1" disabled>
+                          <option>MM</option>
+                          <option>IN</option>
+                        </select>   
+                      </div>
+                </div>
+                <div style="margin-top: 10%;">
+                  <button type="submit" id="submit" class="btn btn-primary">Calculate</button>
+                  <button type="button" class="btn btn-dark">Reset</button>
+                </div>
+                <p class="calc-alert" id="calc-alert" hidden role="alert"></p>
+          </form>
+      </div>
+      <div class="results-pane col-md-6 mt-3 shadow-lg p-3 mb-5 bg-white rounded">
+        <form id="myform2" method="POST">
+          <div class="form-row">
+            <div class="col">
+              <label for="inputFlow">Duct Size</label>
+              <div class="input-group">
+              <input type="number" class="form-control" id="inlineFormInput-1" placeholder="Width" disabled>
+              <div class="input-group-append append" style="width: unset;" >
+                <div class="input-group-text">mm</div>
+              </div>
+            </div>
+            </div>
+            <div class="col">
+              <label for="inputFlow">&nbsp</label>
+              <div class="input-group">
+                <input type="number" class="form-control" id="inlineFormInput-2" placeholder="Height" disabled>
+                <div class="input-group-append append" style="width: unset;">
+                  <div class="input-group-text">mm</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          </form>
+        <table class="table" style="display:none">
+          <tr style="visibility: collapse;">
+            <th style="width: 50%"></th>
+            <th style="width: 25%"></th>
+            <th style="width: 25%"></th>
+          </tr>
+          <tbody>
+            <tr>
+              <td>Equivalent Diameter</td>
+              <td class="dia"  id="ed" align="right"></td>
+              <td class="unit">mm</td>
+            </tr>
+            <tr>
+              <td>Flow Area</td>
+              <td class="fa1"  id="fa1" align="right"></td>
+              <td class="unit">m<sup>2</sup></td>
+            </tr>
+            <tr>
+              <td>Fluid velocity</td>
+              <td class="vel"  id="fv" align="right"></td>
+              <td class="unit">m/sec</td>
+            </tr>
+            <tr>
+              <td>Reynolds Number</td>
+              <td class="rn" id="rn" align="right"></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>Friction factor</td>
+              <td class="ff"  id="ff" align="right"></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>Velocity Pressure</td>
+              <td class="vp"  id="vp" align="right"></td>
+              <td class="unit">Pa</td>
+            </tr>
+            <tr>
+              <td>Head Loss</td>
+              <td class="hl"  id="hl" align="right"></td>
+              <td class="unit">Pa/m</td>
+            </tr>
+          </tbody>
+        </table>
+ 
+      </div>        
+    </div>
+
+</div>
+</div>
+</main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+<script src="../main.js"></script>
+<script src="main.js"></script>
+</body>
+</html>
