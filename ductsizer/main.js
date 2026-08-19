@@ -16,6 +16,7 @@ $(document).ready(function(){
     // one; live width/height adjustments carry this id so the backend amends
     // the same record instead of saving a new card per keystroke.
     var currentHistoryId = null;
+    var lastCalcResponse = null;
 
     // --- Clear / reset button ---
     // .btn-dark is the reset control: wipe every numeric quantity input
@@ -102,9 +103,13 @@ $(document).ready(function(){
       if (this.checked == false){
         $(".append").val('1');
         create_post_4();
+        if (lastSuggestedSizes) renderSuggestions(lastSuggestedSizes);
+        if (lastCalcResponse) checkAlarms(lastCalcResponse);
       }else{
         $(".append").val('0.0393701');
         create_post_3();
+        if (lastSuggestedSizes) renderSuggestions(lastSuggestedSizes);
+        if (lastCalcResponse) checkAlarms(lastCalcResponse);
       }
     });
 
@@ -146,6 +151,13 @@ $(document).ready(function(){
       currentHistoryId = null;
       clearCalcAlert();
       setResultsPane(false);
+      document.getElementById("duct-suggestions").hidden = true;
+      document.getElementById("duct-suggestions").innerHTML = "";
+      lastSuggestedSizes = null;
+      lastCalcResponse = null;
+      clearAlarms();
+      $('.results-pane .table td').removeClass('alarm-warn alarm-crit').removeAttr('title');
+      $('#aspect-ratio-banner').prop('hidden', true).removeClass('warn crit').empty();
     });
 
     // --- Small UI helpers ---
@@ -235,6 +247,9 @@ $(document).ready(function(){
       $("#inlineFormInput-1").prop('disabled', true);
       $("#inlineFormInput-2").prop('disabled', true);
       setResultsPane(false);
+      document.getElementById("duct-suggestions").hidden = true;
+      document.getElementById("duct-suggestions").innerHTML = "";
+      lastSuggestedSizes = null;
     });
 
     // --- Debounce helper ---
@@ -335,13 +350,21 @@ $(document).ready(function(){
           $("#inlineFormInput-1").prop('disabled', false);
           $("#inlineFormInput-2").prop('disabled', false);
           currentHistoryId = response.history_id;
+          lastCalcResponse = response;
           loadHistory();
+          checkAlarms(response);
+          lastSuggestedSizes = suggestRectangularSizes(response.ed);
+          renderSuggestions(lastSuggestedSizes);
+          if (lastSuggestedSizes.length > 0) {
+            var best = lastSuggestedSizes[0];
+            applySuggestion(best.width, best.height);
+          }
          },
          error: function (response) {
            // Distinguish a backend crash (HTTP 500) from an unreachable
            // service so the alert can point at the likely cause.
            showCalcAlert(response && response.status === 500
-             ? 'The calculator service hit an error (HTTP 500). Try a different pair of inputs, or check the backend.'
+             ? 'Check inputs and try again.'
              : 'Could not reach the calculator service. Check that the backend is running, then try again.');
          }
       });
@@ -364,7 +387,8 @@ $(document).ready(function(){
         "flowrate": toSi($("#inputFlow").val(), '.flow-unit', 2.118888, 'CFM'),
         "dw": toSiRect($("#inlineFormInput-1").val()),
         "dh": toSiRect($("#inlineFormInput-2").val()),
-        "history_id": currentHistoryId
+        "history_id": currentHistoryId,
+        
       };
       var formData = JSON.stringify(forMdata);
       $.ajax({
@@ -386,10 +410,14 @@ $(document).ready(function(){
           $("#fa1").text(usVal(response.fa, 10.7639).toFixed(2));
           $("#inlineFormInput-2").val(usVal(response.dh, 0.0393701).toFixed(0));
           currentHistoryId = response.history_id;
+          lastCalcResponse = response;
           loadHistory();
+          checkAlarms(response);
+          lastSuggestedSizes = suggestRectangularSizes(response.ed);
+          renderSuggestions(lastSuggestedSizes);
         },
         error: function () {
-          showCalcAlert('The calculator service could not answer — check that the backend is running, then try again.');
+          showCalcAlert('Check inputs and try again.');
         }
       });
     }
@@ -425,10 +453,14 @@ function create_post_5() {
           $("#hl").text(usVal(response.hl, 0.1225).toFixed(3));
           $("#fa1").text(usVal(response.fa, 10.7639).toFixed(2));
           currentHistoryId = response.history_id;
+          lastCalcResponse = response;
           loadHistory();
+          checkAlarms(response);
+          lastSuggestedSizes = suggestRectangularSizes(response.ed);
+          renderSuggestions(lastSuggestedSizes);
         },
         error: function () {
-          showCalcAlert('The calculator service could not answer — check that the backend is running, then try again.');
+          showCalcAlert('Check inputs and try again.');
         }
       });
     }
@@ -749,4 +781,166 @@ function create_post_5() {
     if (document.fonts && document.fonts.ready) {
       document.fonts.ready.then(syncSwapOffsets);
     }
+
+    // --- Duct size suggestions ---
+    // Computes rectangular duct (width, height) pairs from the equivalent
+    // diameter using the inverse of the standard HVAC formula:
+    //   De = 1.3 * (a*b)^0.625 / (a+b)^0.25
+    // Given an aspect ratio r = a/b, solve for b then a, rounded to 50mm (SI) or 1in (US).
+    var SUGGESTION_RATIOS = [
+      { ratio: 1.25, label: 'Best' },
+      { ratio: 2.0,  label: 'Wide' },
+      { ratio: 3.0,  label: 'Extra wide' }
+    ];
+
+    function suggestRectangularSizes(equivDiaMM) {
+      if (!equivDiaMM || equivDiaMM <= 0) return [];
+      var results = [];
+      for (var i = 0; i < SUGGESTION_RATIOS.length; i++) {
+        var r = SUGGESTION_RATIOS[i].ratio;
+        var b = equivDiaMM * Math.pow(r + 1, 0.25) / (1.3 * Math.pow(r, 0.625));
+        var a = r * b;
+        var isUS = $(".append").val() === "0.0393701";
+        var step = isUS ? 25.4 : 50;
+        a = Math.round(a / step) * step;
+        b = Math.round(b / step) * step;
+        if (a > 0 && b > 0) {
+          results.push({ width: a, height: b, ratio: r, label: SUGGESTION_RATIOS[i].label });
+        }
+      }
+      return results;
+    }
+
+    function renderSuggestions(sizes) {
+      var $container = $("#duct-suggestions");
+      $container.empty();
+      if (!sizes || sizes.length === 0) {
+        $container.prop("hidden", true);
+        return;
+      }
+      var isUS = $(".append").val() === "0.0393701";
+      for (var i = 0; i < sizes.length; i++) {
+        var s = sizes[i];
+        var displayW = isUS ? Math.round(s.width / 25.4) : s.width;
+        var displayH = isUS ? Math.round(s.height / 25.4) : s.height;
+        var unit = isUS ? "in" : "mm";
+        var chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "duct-suggestion";
+        if (s.label === "Best") chip.classList.add("best");
+        chip.setAttribute("data-width", s.width);
+        chip.setAttribute("data-height", s.height);
+        chip.setAttribute("aria-label", s.label + ": " + displayW + " x " + displayH + " " + unit);
+        chip.innerHTML = '<span class="suggestion-label">' + s.label + '</span> <span class="suggestion-size">' + displayW + ' \u00d7 ' + displayH + ' ' + unit + '</span>';
+        $container.append(chip);
+      }
+      $container.prop("hidden", false);
+    }
+
+    function applySuggestion(widthMM, heightMM) {
+      var $w = $("#inlineFormInput-1");
+      var $h = $("#inlineFormInput-2");
+      var isUS = $(".append").val() === "0.0393701";
+      $w.val(isUS ? Math.round(widthMM / 25.4) : widthMM);
+      $h.val(isUS ? Math.round(heightMM / 25.4) : heightMM);
+      $w.prop("disabled", false);
+      $h.prop("disabled", false);
+      $(".duct-suggestion").removeClass("active");
+      $(".duct-suggestion[data-width=\"" + widthMM + "\"][data-height=\"" + heightMM + "\"]").addClass("active");
+      create_post_2();
+    }
+
+    $("#duct-suggestions").on("click", ".duct-suggestion", function () {
+      var w = parseInt($(this).data("width"), 10);
+      var h = parseInt($(this).data("height"), 10);
+      if (w && h) applySuggestion(w, h);
+    });
+
+    var lastSuggestedSizes = null;
+
+    // --- Inline alarm checks (HVAC thumb rules) ---
+    var ALARMS = {
+      velocity_high_warn: 12.5,
+      velocity_high_crit: 15,
+      velocity_low: 5,
+      headloss_warn: 1.0,
+      headloss_crit: 1.5,
+      eqdia_small: 150,
+      eqdia_large: 1000,
+      reynolds_low: 4000,
+      vp_warn: 100
+    };
+
+    function clearAlarms() {
+      $('#alarm-area').empty();
+    }
+
+    function addAlarm(level, msg) {
+      var $area = $('#alarm-area');
+      $area.append('<div class="alarm-badge alarm-' + level + '">' + msg + '</div>');
+    }
+
+    function checkAlarms(resp) {
+      clearAlarms();
+      if (!resp) return;
+      var isUS = $(".append").val() === "0.0393701";
+
+      // Clear any previous cell flags
+      $('.results-pane .table td').removeClass('alarm-warn alarm-crit').removeAttr('title');
+      $('#aspect-ratio-banner').prop('hidden', true).removeClass('warn crit').empty();
+
+      // Helper: add both a badge and a cell flag
+      function flagCell(selector, level, msg) {
+        addAlarm(level, msg);
+        $(selector).addClass('alarm-' + level).attr('title', msg);
+      }
+
+      // 1. Velocity — noise
+      if (resp.fv > 15) {
+        flagCell('#fv', 'crit', 'Velocity > ' + (isUS ? '2953' : '15') + ' ' + (isUS ? 'fpm' : 'm/s') + ' — significant noise');
+      } else if (resp.fv > 12.5) {
+        flagCell('#fv', 'warn', 'Velocity > ' + (isUS ? '2460' : '12.5') + ' ' + (isUS ? 'fpm' : 'm/s') + ' — noise noticeable');
+      } else if (resp.fv < 5 && resp.fv > 0) {
+        flagCell('#fv', 'warn', 'Velocity < ' + (isUS ? '984' : '5') + ' ' + (isUS ? 'fpm' : 'm/s') + ' — dust settling risk');
+      }
+
+      // 2. Head loss — energy
+      if (resp.hl > 1.5) {
+        flagCell('#hl', 'crit', 'Head loss > ' + (isUS ? '0.09' : '1.5') + ' ' + (isUS ? 'in.WC/100ft' : 'Pa/m') + ' — excessive');
+      } else if (resp.hl > 1.0) {
+        flagCell('#hl', 'warn', 'Head loss > ' + (isUS ? '0.06' : '1.0') + ' ' + (isUS ? 'in.WC/100ft' : 'Pa/m') + ' — high energy');
+      }
+
+      // 3. Duct size extremes
+      if (resp.ed < 150) {
+        flagCell('#ed', 'warn', 'Duct < ' + (isUS ? '6' : '150') + ' ' + (isUS ? 'in' : 'mm') + ' — hard to clean');
+      } else if (resp.ed > 1000) {
+        flagCell('#ed', 'warn', 'Duct > ' + (isUS ? '39' : '1000') + ' ' + (isUS ? 'in' : 'mm') + ' — needs reinforcement');
+      }
+
+      // 4. Reynolds number (dimensionless)
+      if (resp.rn > 0 && resp.rn < 4000) {
+        flagCell('#rn', 'warn', 'Re < 4000 — near laminar flow');
+      }
+
+      // 5. Velocity pressure — fan sizing
+      if (resp.vp > 100) {
+        flagCell('#vp', 'warn', 'Velocity pressure > ' + (isUS ? '0.4' : '100') + ' ' + (isUS ? 'in.WC' : 'Pa') + ' — verify fan static pressure');
+      }
+
+      // 6. Aspect ratio — banner below W×H inputs
+      var wVal = parseFloat($('#inlineFormInput-1').val());
+      var hVal = parseFloat($('#inlineFormInput-2').val());
+      if (wVal > 0 && hVal > 0) {
+        var ratio = Math.max(wVal, hVal) / Math.min(wVal, hVal);
+        var $banner = $('#aspect-ratio-banner');
+        if (ratio > 4) {
+          $banner.prop('hidden', false).addClass('crit').text('Aspect ratio ' + ratio.toFixed(1) + ':1 — very elongated');
+        } else if (ratio > 3) {
+          $banner.prop('hidden', false).addClass('warn').text('Aspect ratio ' + ratio.toFixed(1) + ':1 — high ratio');
+        }
+      }
+    }
+
+
   });

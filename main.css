@@ -919,3 +919,33 @@ h1, h2, h3, h4, h5, h6 {
     animation: none;
   }
 }
+
+/* --------------------------------------------------------------------------
+   Global overrides — kill Bootstrap focus ring + number-input spinners
+   -------------------------------------------------------------------------- */
+.btn:focus,
+.btn-primary:focus,
+.btn-dark:focus,
+.btn-outline-secondary:focus,
+.btn-outline-light:focus,
+.form-control:focus,
+.form-check-input:focus + .form-check-label,
+.input-group-text:focus,
+select.form-control:focus,
+.auth-mode-btn:focus,
+.auth-mode-btn:active,
+button:focus,
+a:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}

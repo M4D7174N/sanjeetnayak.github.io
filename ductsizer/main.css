@@ -179,6 +179,9 @@ input:checked + .slider:after {
 /* Error message shown when the calculator service can't answer */
 .calc-alert {
   margin: 14px 0 0;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
   padding: 10px 14px;
   font-size: 0.85rem;
   color: #b3261e;
@@ -238,6 +241,7 @@ input:checked + .slider:after {
 .results-pane .table td {
   border-top: 1px solid rgba(230, 236, 242, 0.12);
   padding: 0.5rem 0;
+  vertical-align: middle;
 }
 
 .results-pane .table td:first-child {
@@ -703,4 +707,140 @@ select {
   &::-ms-expand {
     display: none;
   }
+}
+
+
+.duct-suggestions {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 6px;
+  margin-top: 10px;
+  overflow-x: auto;
+}
+.duct-suggestions[hidden] { display: none !important; }
+.duct-suggestion {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(230, 236, 242, 0.18);
+  background: rgba(255,255,255,0.06);
+  color: var(--on-dark);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  user-select: none;
+  flex-shrink: 0;
+}
+.duct-suggestion:hover { background: rgba(14,140,127,0.18); border-color: var(--accent); }
+.duct-suggestion.active { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 600; }
+.duct-suggestion.best::before { content: "⭐"; font-size: 0.6rem; }
+.duct-suggestion .suggestion-label { font-size: 0.6rem; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.05em; }
+.duct-suggestion .suggestion-size { font-weight: 600; }
+
+.alarm-area { min-height: 28px; margin-top: 6px; display: flex; flex-direction: column; gap: 4px; }
+.alarm-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  padding: 3px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.alarm-badge::before { content: ""; width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.alarm-badge.alarm-warn { color: var(--amber); background: rgba(217,142,43,0.12); border: 1px solid rgba(217,142,43,0.3); }
+.alarm-badge.alarm-warn::before { background: var(--amber); }
+.alarm-badge.alarm-crit { color: #d63c3c; background: rgba(214,60,60,0.12); border: 1px solid rgba(214,60,60,0.3); }
+.alarm-badge.alarm-crit::before { background: #d63c3c; }
+
+/* --------------------------------------------------------------------------
+   Inline result-cell alarm dots — amber warn, red crit
+   -------------------------------------------------------------------------- */
+.results-pane .table td.alarm-warn,
+.results-pane .table td.alarm-crit {
+  position: relative;
+}
+
+.results-pane .table td.alarm-warn::after,
+.results-pane .table td.alarm-crit::after {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-left: 6px;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.results-pane .table td.alarm-warn::after {
+  background: var(--amber);
+}
+
+.results-pane .table td.alarm-crit::after {
+  background: #d63c3c;
+}
+
+/* Hover tooltip on flagged cells */
+.results-pane .table td.alarm-warn[title],
+.results-pane .table td.alarm-crit[title] {
+  cursor: help;
+}
+
+/* --------------------------------------------------------------------------
+   Aspect ratio banner — sits below W×H inputs in results pane
+   -------------------------------------------------------------------------- */
+.aspect-ratio-banner {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.aspect-ratio-banner[hidden] {
+  display: none !important;
+}
+
+.aspect-ratio-banner::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.aspect-ratio-banner.warn {
+  color: var(--amber);
+  background: rgba(217, 142, 43, 0.12);
+  border: 1px solid rgba(217, 142, 43, 0.3);
+}
+
+.aspect-ratio-banner.warn::before {
+  background: var(--amber);
+}
+
+.aspect-ratio-banner.crit {
+  color: #d63c3c;
+  background: rgba(214, 60, 60, 0.12);
+  border: 1px solid rgba(214, 60, 60, 0.3);
+}
+
+.aspect-ratio-banner.crit::before {
+  background: #d63c3c;
 }
