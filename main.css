@@ -809,6 +809,17 @@ h1, h2, h3, h4, h5, h6 {
   width: 100%;
 }
 
+.auth-google-button *,
+.auth-google-button *:focus,
+.auth-google-button *:focus-visible,
+.auth-google-button *:active,
+.auth-google-button:focus-within {
+  outline: none !important;
+  box-shadow: none !important;
+}
+.auth-google-button iframe {
+  border: none !important;
+}
 .auth-message {
   font-size: 13px;
   min-height: 20px;
