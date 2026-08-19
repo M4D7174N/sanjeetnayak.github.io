@@ -43,8 +43,26 @@
     </form>
     </div>
   </div>
+
+    <!-- <section class="tool-intro" aria-label="About DuctSizer and how to use it">
+      <div class="tool-intro-copy">
+        <p class="tool-intro-eyebrow">DuctSizer</p>
+        <p class="tool-intro-text">
+          Sizes HVAC duct runs from the Darcy–Weisbach equation. Check any
+          <strong>two</strong> of flow, head loss, velocity and diameter — it
+          solves the other two and returns the duct size, Reynolds number,
+          friction factor and more, in SI or US units.
+        </p>
+      </div>
+      <ol class="tool-intro-steps">
+        <li>Check the two quantities you know</li>
+        <li>Pick SI or US units</li>
+        <li>Calculate, then refine to a rectangular duct</li>
+      </ol>
+    </section> -->
+
     <div class="row calc-row pane-closed">
-      <div class="col-md-6 mt-3 shadow-lg p-3 mb-5 bg-white rounded">
+      <div class="col-md-6 calc-col mt-3 shadow-lg p-3 mb-3 mb-md-5 bg-white rounded">
         <form id="myform" method="POST">
             <label for="inputFlow">Flow Rate</label>
               <div class="input-group" style="margin-bottom: 1rem;">
@@ -114,7 +132,24 @@
                 <p class="calc-alert" id="calc-alert" hidden role="alert"></p>
           </form>
       </div>
-      <div class="results-pane col-md-6 mt-3 shadow-lg p-3 mb-5 bg-white rounded">
+      <div class="results-pane col-md-6 mt-3 shadow-lg p-3 mb-3 mb-md-5">
+        <section class="tool-intro" aria-label="About DuctSizer and how to use it">
+      <div class="tool-intro-copy">
+        <p class="tool-intro-eyebrow">DuctSizer</p>
+        <p class="tool-intro-text">
+          Sizes HVAC duct runs from the Darcy–Weisbach equation. Check any
+          <strong>two</strong> of flow, head loss, velocity and diameter — it
+          solves the other two and returns the duct size, Reynolds number,
+          friction factor and more, in SI or US units.
+        </p>
+      </div>
+      <ol class="tool-intro-steps">
+        <li>Check the two quantities you know</li>
+        <li>Pick SI or US units</li>
+        <li>Calculate, then refine to a rectangular duct</li>
+      </ol>
+    </section>
+        <div class="results-content">
         <form id="myform2" method="POST">
           <div class="form-row">
             <div class="col">
@@ -181,8 +216,18 @@
             </tr>
           </tbody>
         </table>
- 
+        </div>
+
       </div>
+    </div>
+
+    <!-- Sign-in prompt — shown to guests so their runs aren't silently lost -->
+    <div class="login-notice" id="login-notice" hidden>
+      <i class="fa fa-history login-notice-icon" aria-hidden="true"></i>
+      <p class="login-notice-text">
+        <strong>Not signed in.</strong> Your calculations won't be saved —
+        <a href="/login.html">sign in</a> to keep a history of your runs and revisit them later.
+      </p>
     </div>
 
     <!-- Saved calculation history — shown for signed-in users only -->

@@ -51,10 +51,10 @@ $(document).ready(function(){
       if (this.checked == false){
         $("#inputFlow").val('');
         $("#inputFlow").prop('disabled', true);
-        $("#inputFlow1").prop('disabled', true);
+        // $("#inputFlow1").prop('disabled', true);
       }else{
         $("#inputFlow").prop('disabled', false);
-        $("#inputFlow1").prop('disabled', false);
+        // $("#inputFlow1").prop('disabled', false);
       }
     });
     // `second` = Head loss checkbox: same clear/disable-or-enable pattern.
@@ -62,10 +62,10 @@ $(document).ready(function(){
       if (this.checked == false){
         $("#inputHead").val('');
         $("#inputHead").prop('disabled', true);
-        $("#inputHead1").prop('disabled', true);
+        // $("#inputHead1").prop('disabled', true);
       }else{
         $("#inputHead").prop('disabled', false);
-        $("#inputHead1").prop('disabled', false);
+        // $("#inputHead1").prop('disabled', false);
       }
     });
     // `third` = Velocity checkbox: same clear/disable-or-enable pattern.
@@ -73,10 +73,10 @@ $(document).ready(function(){
       if (this.checked == false){
         $("#inputVel").val('');
         $("#inputVel").prop('disabled', true);
-        $("#inputVel1").prop('disabled', true);
+        // $("#inputVel1").prop('disabled', true);
       }else{
         $("#inputVel").prop('disabled', false);
-        $("#inputVel1").prop('disabled', false);
+        // $("#inputVel1").prop('disabled', false);
       }
     });
     // `fourth` = Diameter checkbox: same clear/disable-or-enable pattern.
@@ -84,10 +84,10 @@ $(document).ready(function(){
       if (this.checked == false){
         $("#inputDia").val('');
         $("#inputDia").prop('disabled', true);
-        $("#inputDia1").prop('disabled', true);
+        // $("#inputDia1").prop('disabled', true);
       }else{
         $("#inputDia").prop('disabled', false);
-        $("#inputDia1").prop('disabled', false);
+        // $("#inputDia1").prop('disabled', false);
       }
     });
 
@@ -161,9 +161,40 @@ $(document).ready(function(){
       $('#calc-alert').prop('hidden', true);
     }
 
-    // Fold the results pane shut until a calculation lands.
+    // Fold the results pane shut until a calculation lands. The intro is the
+    // cover page of the uncalculated calculator: it folds away when a result
+    // opens and returns when the results are dismissed.
     function setResultsPane(open) {
       $('.calc-row').toggleClass('pane-closed', !open);
+      $('.tool-intro').toggleClass('intro-closed', open);
+      // 'swapped' makes the columns trade places: on desktop the form slides
+      // from the right to the left; on mobile it slides up from below while
+      // the results pane slides down from above.
+      $('.calc-row').toggleClass('swapped', open);
+      // The pane's height changes when the intro folds away / results turn
+      // in. Re-measure the mobile swap offsets once that settles so a return
+      // to the folded layout lands flush.
+      if (!open) { setTimeout(syncSwapOffsets, 900); }
+    }
+
+    // Mobile pane-swap offsets. The two stacked columns are unequal heights,
+    // so a self-relative translateY(±100%) can't swap them flush. Measure the
+    // real heights and expose them as CSS vars: the form slides DOWN by the
+    // results pane's height, the results pane UP by the form's, each landing
+    // in the other's slot. Desktop is equal-width so needs no offsets.
+    function syncSwapOffsets() {
+      var row = document.querySelector('.calc-row');
+      if (!row) { return; }
+      if (window.innerWidth >= 768) {
+        row.style.removeProperty('--swap-calc');
+        row.style.removeProperty('--swap-results');
+        return;
+      }
+      var calc = row.querySelector('.calc-col');
+      var results = row.querySelector('.results-pane');
+      if (!calc || !results) { return; }
+      row.style.setProperty('--swap-calc', results.offsetHeight + 'px');
+      row.style.setProperty('--swap-results', -calc.offsetHeight-45 + 'px');
     }
 
     // --- Unit conversion helpers: display units <-> SI ---
@@ -698,7 +729,9 @@ function create_post_5() {
     // Refresh the grid when the site-wide auth state flips (login/logout on
     // the page), and once on load. No token → the section stays hidden.
     function handleHistoryAuth() {
-      if (readAuthToken()) { loadHistory(); } else { hideHistory(); }
+      var signedIn = !!readAuthToken();
+      $('#login-notice').prop('hidden', signedIn);
+      if (signedIn) { loadHistory(); } else { hideHistory(); }
     }
     var lastAuthState = document.documentElement.dataset.authState;
     var authObserver = new MutationObserver(function () {
@@ -707,4 +740,13 @@ function create_post_5() {
     });
     authObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-auth-state'] });
     handleHistoryAuth();
+
+    // Keep the mobile swap offsets correct: on load (and once the webfonts
+    // land / the window resizes, since either can change the column heights).
+    syncSwapOffsets();
+    $(window).on('resize', function () { delay(syncSwapOffsets, 150); });
+    $(window).on('load', syncSwapOffsets);
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(syncSwapOffsets);
+    }
   });
