@@ -742,6 +742,70 @@ select {
 .duct-suggestion .suggestion-size { font-weight: 600; }
 
 .alarm-area { min-height: 28px; margin-top: 6px; display: flex; flex-direction: column; gap: 4px; }
+
+/* --------------------------------------------------------------------------
+   Dot table — separate table for coloured alarm dots below results
+   -------------------------------------------------------------------------- */
+.dot-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 4px;
+}
+
+.dot-table td {
+  padding: 4px 8px;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+  border: none;
+}
+
+.dot-table td:first-child {
+  width: 14px;
+  padding-right: 4px;
+  text-align: center;
+}
+
+.dot-table td:first-child::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.dot-table td.alarm-warn:first-child::before {
+  background: var(--amber);
+}
+
+.dot-table td.alarm-crit:first-child::before {
+  background: #d63c3c;
+}
+
+.dot-table td.alarm-warn {
+  color: var(--amber);
+}
+
+.dot-table td.alarm-crit {
+  color: #d63c3c;
+}
+
+/* On low-width devices, show the dot table below the numbers */
+@media (max-width: 767px) {
+  .dot-table {
+    display: table;
+  }
+}
+
+/* On wider screens, the inline cell dots are enough — hide the table */
+@media (min-width: 768px) {
+  .dot-table {
+    display: none;
+  }
+}
 .alarm-badge {
   display: inline-flex;
   align-items: center;
@@ -762,34 +826,36 @@ select {
 .alarm-badge.alarm-crit::before { background: #d63c3c; }
 
 /* --------------------------------------------------------------------------
-   Dedicated alarm column — dot sits inline, left-aligned
+   Inline result-cell alarm dots — amber warn, red crit
    -------------------------------------------------------------------------- */
-.results-pane .table td.alarm-cell {
-  text-align: left;
-  vertical-align: middle;
-  padding-left: 4px;
+.results-pane .table td.alarm-warn,
+.results-pane .table td.alarm-crit {
+  position: relative;
 }
 
-.results-pane .table td.alarm-cell.alarm-warn::after,
-.results-pane .table td.alarm-cell.alarm-crit::after {
+.results-pane .table td.alarm-warn::after,
+.results-pane .table td.alarm-crit::after {
   content: '';
   display: inline-block;
   width: 8px;
   height: 8px;
   border-radius: 50%;
+  margin-left: 6px;
   vertical-align: middle;
+  flex-shrink: 0;
 }
 
-.results-pane .table td.alarm-cell.alarm-warn::after {
+.results-pane .table td.alarm-warn::after {
   background: var(--amber);
 }
 
-.results-pane .table td.alarm-cell.alarm-crit::after {
+.results-pane .table td.alarm-crit::after {
   background: #d63c3c;
 }
 
-/* Hover tooltip on flagged alarm cells */
-.results-pane .table td.alarm-cell[title] {
+/* Hover tooltip on flagged cells */
+.results-pane .table td.alarm-warn[title],
+.results-pane .table td.alarm-crit[title] {
   cursor: help;
 }
 

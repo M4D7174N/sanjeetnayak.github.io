@@ -103,12 +103,26 @@ $(document).ready(function(){
       if (this.checked == false){
         $(".append").val('1');
         create_post_4();
-        if (lastSuggestedSizes) renderSuggestions(lastSuggestedSizes);
+        if (lastCalcResponse) {
+          lastSuggestedSizes = suggestRectangularSizes(lastCalcResponse.ed);
+          renderSuggestions(lastSuggestedSizes);
+          if (lastSuggestedSizes.length > 0) {
+            var best = lastSuggestedSizes[0];
+            applySuggestion(best.width, best.height);
+          }
+        }
         if (lastCalcResponse) checkAlarms(lastCalcResponse);
       }else{
         $(".append").val('0.0393701');
         create_post_3();
-        if (lastSuggestedSizes) renderSuggestions(lastSuggestedSizes);
+        if (lastCalcResponse) {
+          lastSuggestedSizes = suggestRectangularSizes(lastCalcResponse.ed);
+          renderSuggestions(lastSuggestedSizes);
+          if (lastSuggestedSizes.length > 0) {
+            var best = lastSuggestedSizes[0];
+            applySuggestion(best.width, best.height);
+          }
+        }
         if (lastCalcResponse) checkAlarms(lastCalcResponse);
       }
     });
@@ -788,7 +802,7 @@ function create_post_5() {
     //   De = 1.3 * (a*b)^0.625 / (a+b)^0.25
     // Given an aspect ratio r = a/b, solve for b then a, rounded to 50mm (SI) or 1in (US).
     var SUGGESTION_RATIOS = [
-      { ratio: 1.25, label: 'Best' },
+      { ratio: 1.0,  label: 'Best' },
       { ratio: 2.0,  label: 'Wide' },
       { ratio: 3.0,  label: 'Extra wide' }
     ];
@@ -796,14 +810,23 @@ function create_post_5() {
     function suggestRectangularSizes(equivDiaMM) {
       if (!equivDiaMM || equivDiaMM <= 0) return [];
       var results = [];
+      var isUS = $(".append").val() === "0.0393701";
+      // US: nearest even number of inches → step = 2 × 25.4 = 50.8 mm
+      // SI: nearest 50 mm
+      var step = isUS ? 50.8 : 50;
       for (var i = 0; i < SUGGESTION_RATIOS.length; i++) {
         var r = SUGGESTION_RATIOS[i].ratio;
         var b = equivDiaMM * Math.pow(r + 1, 0.25) / (1.3 * Math.pow(r, 0.625));
         var a = r * b;
-        var isUS = $(".append").val() === "0.0393701";
-        var step = isUS ? 25.4 : 50;
-        a = Math.round(a / step) * step;
-        b = Math.round(b / step) * step;
+        if (r === 1.0) {
+          // Square: round once so both sides are identical
+          var sq = Math.round(a / step) * step;
+          a = sq;
+          b = sq;
+        } else {
+          a = Math.round(a / step) * step;
+          b = Math.round(b / step) * step;
+        }
         if (a > 0 && b > 0) {
           results.push({ width: a, height: b, ratio: r, label: SUGGESTION_RATIOS[i].label });
         }
@@ -860,13 +883,13 @@ function create_post_5() {
 
     // --- Inline alarm checks (HVAC thumb rules) ---
     var ALARMS = {
-      velocity_high_warn: 12.5,
-      velocity_high_crit: 15,
-      velocity_low: 5,
+      velocity_high_warn: 6,
+      velocity_high_crit: 8,
+      velocity_low: 2,
       headloss_warn: 1.0,
       headloss_crit: 1.5,
       eqdia_small: 150,
-      eqdia_large: 1000,
+      eqdia_large: 3000,
       reynolds_low: 4000,
       vp_warn: 100
     };
@@ -898,11 +921,11 @@ function create_post_5() {
 
       // 1. Velocity — noise
       if (resp.fv > 15) {
-        flagCell('#fv', 'crit', 'Velocity > ' + (isUS ? '2953' : '15') + ' ' + (isUS ? 'fpm' : 'm/s') + ' — significant noise');
+        flagCell('#fv', 'crit', 'Velocity > ' + (isUS ? '1500' : '8') + ' ' + (isUS ? 'fpm' : 'm/s') + ' — significant noise');
       } else if (resp.fv > 12.5) {
-        flagCell('#fv', 'warn', 'Velocity > ' + (isUS ? '2460' : '12.5') + ' ' + (isUS ? 'fpm' : 'm/s') + ' — noise noticeable');
+        flagCell('#fv', 'warn', 'Velocity > ' + (isUS ? '1200' : '6') + ' ' + (isUS ? 'fpm' : 'm/s') + ' — noise noticeable');
       } else if (resp.fv < 5 && resp.fv > 0) {
-        flagCell('#fv', 'warn', 'Velocity < ' + (isUS ? '984' : '5') + ' ' + (isUS ? 'fpm' : 'm/s') + ' — dust settling risk');
+        flagCell('#fv', 'warn', 'Velocity < ' + (isUS ? '400' : '2') + ' ' + (isUS ? 'fpm' : 'm/s') + ' — Thermal Startification');
       }
 
       // 2. Head loss — energy
@@ -916,7 +939,7 @@ function create_post_5() {
       if (resp.ed < 150) {
         flagCell('#ed', 'warn', 'Duct < ' + (isUS ? '6' : '150') + ' ' + (isUS ? 'in' : 'mm') + ' — hard to clean');
       } else if (resp.ed > 1000) {
-        flagCell('#ed', 'warn', 'Duct > ' + (isUS ? '39' : '1000') + ' ' + (isUS ? 'in' : 'mm') + ' — needs reinforcement');
+        flagCell('#ed', 'warn', 'Duct > ' + (isUS ? '120' : '3000') + ' ' + (isUS ? 'in' : 'mm') + ' — needs reinforcement');
       }
 
       // 4. Reynolds number (dimensionless)
