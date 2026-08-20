@@ -844,3 +844,59 @@ select {
 .aspect-ratio-banner.crit::before {
   background: #d63c3c;
 }
+
+    /* --- ARROW CONTAINER & STYLING --- */
+    .scroll-arrow-container {
+      position: absolute;
+      bottom: 30px; /* Positions arrow near bottom of the screen */
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      text-decoration: none;
+      color: #ffffff;
+      opacity: 0.8;
+      transition: opacity 0.3s ease;
+    }
+
+    .scroll-arrow-container:hover {
+      opacity: 1;
+    }
+
+    /* CSS Drawn Arrow (No image files or icon libraries needed) */
+    .arrow {
+      box-sizing: border-box;
+      height: 20px;
+      width: 20px;
+      border-style: solid;
+      border-color: white;
+      border-width: 0 4px 4px 0; /* Creates an L shape */
+      transform: rotate(45deg);  /* Rotates L shape into an arrow pointing down */
+      margin: 0 auto 8px auto;
+      
+      /* Links the animation defined below */
+      animation: bounce 2s infinite; 
+    }
+
+    .scroll-text {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    /* --- BOUNCE ANIMATION KEYFRAMES --- */
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0) rotate(45deg);
+      }
+      40% {
+        transform: translateY(-15px) rotate(45deg); /* Moves up */
+      }
+      60% {
+        transform: translateY(-7px) rotate(45deg);  /* Minor secondary bounce */
+      }
+    }
+    @media (min-width: 768px) {
+      .scroll-arrow-container {
+        display: none;
+      }
+    }
