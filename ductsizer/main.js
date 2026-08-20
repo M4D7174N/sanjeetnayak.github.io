@@ -892,7 +892,8 @@ function create_post_5() {
       // Helper: add both a badge and a cell flag
       function flagCell(selector, level, msg) {
         addAlarm(level, msg);
-        $(selector).addClass('alarm-' + level).attr('title', msg);
+        var $row = $(selector).closest('tr');
+        $row.find('.alarm-cell').addClass('alarm-' + level).attr('title', msg);
       }
 
       // 1. Velocity — noise

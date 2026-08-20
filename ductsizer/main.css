@@ -762,36 +762,34 @@ select {
 .alarm-badge.alarm-crit::before { background: #d63c3c; }
 
 /* --------------------------------------------------------------------------
-   Inline result-cell alarm dots — amber warn, red crit
+   Dedicated alarm column — dot sits inline, left-aligned
    -------------------------------------------------------------------------- */
-.results-pane .table td.alarm-warn,
-.results-pane .table td.alarm-crit {
-  position: relative;
+.results-pane .table td.alarm-cell {
+  text-align: left;
+  vertical-align: middle;
+  padding-left: 4px;
 }
 
-.results-pane .table td.alarm-warn::after,
-.results-pane .table td.alarm-crit::after {
+.results-pane .table td.alarm-cell.alarm-warn::after,
+.results-pane .table td.alarm-cell.alarm-crit::after {
   content: '';
   display: inline-block;
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  margin-left: 6px;
   vertical-align: middle;
-  flex-shrink: 0;
 }
 
-.results-pane .table td.alarm-warn::after {
+.results-pane .table td.alarm-cell.alarm-warn::after {
   background: var(--amber);
 }
 
-.results-pane .table td.alarm-crit::after {
+.results-pane .table td.alarm-cell.alarm-crit::after {
   background: #d63c3c;
 }
 
-/* Hover tooltip on flagged cells */
-.results-pane .table td.alarm-warn[title],
-.results-pane .table td.alarm-crit[title] {
+/* Hover tooltip on flagged alarm cells */
+.results-pane .table td.alarm-cell[title] {
   cursor: help;
 }
 
