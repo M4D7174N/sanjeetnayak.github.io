@@ -114,6 +114,12 @@ input:checked + .slider:after {
 .calc-row { display: flex; }
 .calc-row .results-pane { order: -1; }
 
+/* Mobile: after calculation, flip columns so input is on top, results below */
+@media (max-width: 767px) {
+  .calc-row.calc-active .calc-col { order: -1; }
+  .calc-row.calc-active .results-pane { order: 0; }
+}
+
 /* The results pane is always a visible dark card — a blank placeholder until a
    calculation lands. The content inside is the page that turns in on submit. */
 .calc-row .results-pane {

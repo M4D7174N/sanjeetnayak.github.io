@@ -193,6 +193,10 @@ $(document).ready(function(){
     function setResultsPane(open) {
       $('.calc-row').toggleClass('pane-closed', !open);
       $('.tool-intro').toggleClass('intro-closed', open);
+      // Mobile: flip column order so input is on top, results below
+      if (window.innerWidth < 768) {
+        $('.calc-row').toggleClass('calc-active', open);
+      }
     }
 
         // --- Unit conversion helpers: display units <-> SI ---
@@ -322,6 +326,13 @@ $(document).ready(function(){
           clearCalcAlert();
           $('.table').show();
           setResultsPane(true);
+          // Mobile: smooth scroll to results after page-turn animation
+          if (window.innerWidth < 768) {
+            setTimeout(function() {
+              var target = document.querySelector('.results-content');
+              if (target) { target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+            }, 400);
+          }
           $("#rn").text(response.rn.toFixed(0));
           $("#ff").text(response.ff.toFixed(4));
           $("#fv").text(usVal(response.fv, 196.85).toFixed(2));
