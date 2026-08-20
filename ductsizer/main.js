@@ -193,37 +193,9 @@ $(document).ready(function(){
     function setResultsPane(open) {
       $('.calc-row').toggleClass('pane-closed', !open);
       $('.tool-intro').toggleClass('intro-closed', open);
-      // 'swapped' makes the columns trade places: on desktop the form slides
-      // from the right to the left; on mobile it slides up from below while
-      // the results pane slides down from above.
-      $('.calc-row').toggleClass('swapped', open);
-      // The pane's height changes when the intro folds away / results turn
-      // in. Re-measure the mobile swap offsets once that settles so a return
-      // to the folded layout lands flush.
-      if (!open) { setTimeout(syncSwapOffsets, 900); }
     }
 
-    // Mobile pane-swap offsets. The two stacked columns are unequal heights,
-    // so a self-relative translateY(±100%) can't swap them flush. Measure the
-    // real heights and expose them as CSS vars: the form slides DOWN by the
-    // results pane's height, the results pane UP by the form's, each landing
-    // in the other's slot. Desktop is equal-width so needs no offsets.
-    function syncSwapOffsets() {
-      var row = document.querySelector('.calc-row');
-      if (!row) { return; }
-      if (window.innerWidth >= 768) {
-        row.style.removeProperty('--swap-calc');
-        row.style.removeProperty('--swap-results');
-        return;
-      }
-      var calc = row.querySelector('.calc-col');
-      var results = row.querySelector('.results-pane');
-      if (!calc || !results) { return; }
-      row.style.setProperty('--swap-calc', results.offsetHeight + 'px');
-      row.style.setProperty('--swap-results', -calc.offsetHeight-45 + 'px');
-    }
-
-    // --- Unit conversion helpers: display units <-> SI ---
+        // --- Unit conversion helpers: display units <-> SI ---
     // The backend only accepts SI (flow L/s, head Pa/m, velocity m/sec,
     // diameter mm), so every request is sent in SI and every response is
     // SI. toSi() converts one input value from the unit currently shown in
@@ -787,14 +759,7 @@ function create_post_5() {
     authObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-auth-state'] });
     handleHistoryAuth();
 
-    // Keep the mobile swap offsets correct: on load (and once the webfonts
-    // land / the window resizes, since either can change the column heights).
-    syncSwapOffsets();
-    $(window).on('resize', function () { delay(syncSwapOffsets, 150); });
-    $(window).on('load', syncSwapOffsets);
-    if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(syncSwapOffsets);
-    }
+
 
     // --- Duct size suggestions ---
     // Computes rectangular duct (width, height) pairs from the equivalent

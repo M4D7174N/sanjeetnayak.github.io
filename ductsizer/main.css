@@ -108,6 +108,12 @@ input:checked + .slider:after {
   color: red;
 }
 
+/* Stationary two-pane layout: results-pane (intro + results) always sits on
+   the left (desktop) / top (mobile) via CSS order; calc-col (input form)
+   stays fixed on the right / below. No column swapping. */
+.calc-row { display: flex; }
+.calc-row .results-pane { order: -1; }
+
 /* The results pane is always a visible dark card — a blank placeholder until a
    calculation lands. The content inside is the page that turns in on submit. */
 .calc-row .results-pane {
@@ -115,65 +121,15 @@ input:checked + .slider:after {
 }
 
 .calc-row .results-content {
-  transform-origin: left center;
+  transform-origin: bottom center;
   transition: transform 0.85s cubic-bezier(0.22, 1, 0.36, 1),
               opacity 0.85s ease;
 }
 
 .calc-row.pane-closed .results-content {
-  transform: rotateY(-90deg);
+  transform: rotateX(-90deg);
   opacity: 0;
   visibility: hidden;
-}
-
-/* The form starts on the right (desktop) / below (mobile), the results pane
-   on the left / above; once a result lands they trade places. Each column
-   slides one column width/height on the same timing and easing as the
-   results content turning in. Desktop columns are equal width, so a
-   self-relative translateX(±100%) swaps them flush. Mobile columns stack at
-   unequal heights — the offsets come from JS as pixels (--swap-calc /
-   --swap-results) so they land flush too. */
-.calc-row .calc-col,
-.calc-row .results-pane {
-  transition: transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-@media (min-width: 768px) {
-  .calc-row .calc-col {
-    transform: translateX(100%);
-  }
-
-  .calc-row .results-pane {
-    transform: translateX(-100%);
-  }
-
-  .calc-row.swapped .calc-col,
-  .calc-row.swapped .results-pane {
-    transform: translateX(0);
-  }
-}
-
-@media (max-width: 767px) {
-  .calc-row .calc-col {
-    transform: translateY(var(--swap-calc, 100%));
-  }
-
-  .calc-row .results-pane {
-    transform: translateY(var(--swap-results, -100%));
-  }
-
-  .calc-row.swapped .calc-col,
-  .calc-row.swapped .results-pane {
-    transform: translateY(0);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .calc-row .results-content,
-  .calc-row .calc-col,
-  .calc-row .results-pane {
-    transition: none;
-  }
 }
 
 /* Error message shown when the calculator service can't answer */
