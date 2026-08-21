@@ -896,12 +896,12 @@ function create_post_5() {
       }
 
       // 1. Velocity — noise
-      if (resp.fv > 15) {
-        flagCell('#fv', 'crit', 'Velocity > ' + (isUS ? '1500' : '8') + ' ' + (isUS ? 'fpm' : 'm/s') + ' — significant noise');
-      } else if (resp.fv > 12.5) {
-        flagCell('#fv', 'warn', 'Velocity > ' + (isUS ? '1200' : '6') + ' ' + (isUS ? 'fpm' : 'm/s') + ' — noise noticeable');
-      } else if (resp.fv < 5 && resp.fv > 0) {
-        flagCell('#fv', 'warn', 'Velocity < ' + (isUS ? '400' : '2') + ' ' + (isUS ? 'fpm' : 'm/s') + ' — Thermal Startification');
+      if (resp.fv > 8) {
+        flagCell('#fv', 'crit', 'Velocity ~ ' + (isUS ? '1500' : '8') + ' ' + (isUS ? 'fpm' : 'm/s') + ' — significant noise');
+      } else if (resp.fv > 6) {
+        flagCell('#fv', 'warn', 'Velocity ~ ' + (isUS ? '1200' : '6') + ' ' + (isUS ? 'fpm' : 'm/s') + ' — noise noticeable');
+      } else if (resp.fv < 2 && resp.fv > 0) {
+        flagCell('#fv', 'warn', 'Velocity ~ ' + (isUS ? '400' : '2') + ' ' + (isUS ? 'fpm' : 'm/s') + ' — Thermal Startification');
       }
 
       // 2. Head loss — energy
@@ -913,9 +913,9 @@ function create_post_5() {
 
       // 3. Duct size extremes
       if (resp.ed < 150) {
-        flagCell('#ed', 'warn', 'Duct < ' + (isUS ? '6' : '150') + ' ' + (isUS ? 'in' : 'mm') + ' — hard to clean');
-      } else if (resp.ed > 1000) {
-        flagCell('#ed', 'warn', 'Duct > ' + (isUS ? '120' : '3000') + ' ' + (isUS ? 'in' : 'mm') + ' — needs reinforcement');
+        flagCell('#ed', 'warn', 'Duct ~ ' + (isUS ? '6' : '150') + ' ' + (isUS ? 'in' : 'mm') + ' — hard to clean');
+      } else if (resp.ed > 3000) {
+        flagCell('#ed', 'warn', 'Duct ~ ' + (isUS ? '120' : '3000') + ' ' + (isUS ? 'in' : 'mm') + ' — needs reinforcement');
       }
 
       // 4. Reynolds number (dimensionless)
